@@ -15,8 +15,8 @@ console.log(add);
 // Functions
 
 // Adding a Taks
-function addTask(task){
-    if(!task){
+function addTask(task) {
+    if (!task) {
         showNotification('Task Can Not Added');
         return;
     }
@@ -26,8 +26,8 @@ function addTask(task){
 }
 
 // Delete a Task
-function deleteTask(taskId){
-    const new_task = tasks.filter((task)=>{         //Passing Task in Argument Because Search in Only Task Object in the Tasks Array
+function deleteTask(taskId) {
+    const new_task = tasks.filter((task) => {         //Passing Task in Argument Because Search in Only Task Object in the Tasks Array
         return task.id != taskId;
     });
 
@@ -37,12 +37,12 @@ function deleteTask(taskId){
 }
 
 // Mark Task as Complete
-function toggleTask(taskId){
-    let selectTask = tasks.filter((task)=>{
+function toggleTask(taskId) {
+    let selectTask = tasks.filter((task) => {
         return task.id == taskId;
     })
 
-    if(selectTask.length > 0){
+    if (selectTask.length > 0) {
         const curTask = selectTask[0];
         curTask.done = !curTask.done;
         showNotification('Task Toggeled Successfully');
@@ -53,48 +53,70 @@ function toggleTask(taskId){
 }
 
 // Refresh Page Every Time After Adding or Delete Task
-function addTaskToDOM(task){
+function addTaskToDOM(task) {
     const li = document.createElement('li');
-    li.innerHTML = 
-    `<input type="checkbox" id="${task.id}" data-id="${task.id}" ${task.done ? 'checked' : ''} class="custom-checkbox">
+    li.innerHTML =
+        `<input type="checkbox" id="${task.id}" data-id="${task.id}" ${task.done ? 'checked' : ''} class="custom-checkbox">
     <label for="${task.id}">${task.text}</label>
     <img src="trash-solid.svg" class="delete" data-id="${task.id}" />`;
     tasksList.append(li);
 }
 
 
-function renderList(){
+function renderList() {
     tasksList.innerHTML = '';
-    for(let i = 0; i < tasks.length;i++){
+    for (let i = 0; i < tasks.length; i++) {
         addTaskToDOM(tasks[i]);
     }
     taskCount.innerText = tasks.length;
 }
 
 // Show Notification that task is Added or deleted, Mark Successfully
-function showNotification(massage){
+function showNotification(massage) {
     window.alert(massage);
 }
 
-
-add.addEventListener('keyup',(e)=>{
-    if(e.key == 'Enter'){
+function handleInputKeyPress(e) {
+    if (e.key == 'Enter') {
         let text = e.target.value;
-        
+
         // If User Press Enter WithOut Add Any Task
-        if(!text){
+        if (!text) {
             showNotification('Task Can Not Be Empty')
             return;
         }
-        
+
         const task = {
             text,                   //means text : text
-            id : Date.now().toString(),         // Best Way to Give ID
-            done : false
+            id: Date.now().toString(),         // Best Way to Give ID
+            done: false
         }
-        console.log(task.text);
         e.target.value = '';
         addTask(task);
     }
-})
+}
 
+
+// Instead of Adding Event Listner For Every Event in Web Page Add Event Delegation
+// Event Delegation Means Add A Single Event Listner to Whole Document and Inside the Listener We Find Out Where User is Clicked
+
+function handleInputClicks(e) {
+    const target = e.target;
+    if (target.className == 'delete') {
+        const taskId = target.getAttribute('data-id');
+        // const taskId = target.dataset.id;                    //Also Use This
+        deleteTask(taskId);
+        return;
+    } else if (target.className == 'custom-checkbox') {
+        const taskId = target.getAttribute('data-id');
+        // const taskId = target.dataset.id;                    //Also Use This
+        toggleTask(taskId);
+        return;
+    }
+}
+function initialize() {
+    add.addEventListener('keyup', handleInputKeyPress);
+    document.addEventListener('click', handleInputClicks);
+}
+
+initialize();
